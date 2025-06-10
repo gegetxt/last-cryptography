@@ -1,0 +1,52 @@
+version: '3.7'
+
+services:
+  auth-service:
+    build:
+      context: ./auth-service
+    ports:
+      - "8000:8000"
+    networks:
+      - backend
+    depends_on:
+      - db  # auth-service'in db servisine bağlı olduğunu belirtiyoruz
+
+  hsm-service:
+    build:
+      context: ./hsm-service
+    ports:
+      - "8002:8000"
+    networks:
+      - backend
+
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: projecT41
+      POSTGRES_DB: xcardia
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - backend
+
+  pdf2jpg-service:
+    build:
+      context: ./pdf2jpg-service
+    ports:
+      - "8001:8000"
+    networks:
+      - backend
+    depends_on:
+      - db
+    volumes:
+      - ./pdf2jpg-service/temp:/app/temp
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  postgres_data:
